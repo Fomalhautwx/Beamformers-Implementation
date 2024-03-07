@@ -1,3 +1,4 @@
+
 close all; 
 clear Al; 
 
@@ -12,7 +13,7 @@ Wc = ones(M, 1) / M;                % Fixed Beamformer
 Ws = [1,1,-1,-1;1,-1,-1,1;1,-1,1,-1]; % Blocking Matrix
 Al = randn(3, 1);                   % Random initialization of MC
 
-theta0 = 10*pi/180;  % Target direction
+theta0 = 0*pi/180;  % Target direction
 theta1 = 30*pi/180; theta2 = -90*pi/180;
 s0=exp(2j*pi*[0:M-1]'*f*d*sin(theta0)/c); % Steering vector of Target direction. Column vector get.
 s1 = exp(2j*pi*[0:M-1]'*f*d*sin(theta1)/c); s2 = exp(2j*pi*[0:M-1]'*f*d*sin(theta2)/c);
@@ -78,13 +79,21 @@ end
 
 %%Test
 Xm = s_theta'*diag(PreSteering);
-Output = abs(real(Xm*Wc-(Al'*(Ws*Xm'))'));
+Output = real(Xm*Wc-(Al'*(Ws*Xm'))');
+Norm_outpower = Output.*Output;
 
 plot(theta, Output)
 xticks(-pi/2:pi/4:pi/2); % 设置刻度为0、π/2、π、3π/2、2π
 xticklabels({'-π/2', '-π/4', '0', 'π/4', 'π/2'}); % 设置标签
 
-polarplot(theta,Output)
+polarplot(theta,Norm_outpower)
 
 figure;
 plot(Power, '.')
+xlabel("Iteration times")
+ylabel("Normalized Output Power")
+
+filename = 'GSCSpatialresp.bin';
+fid = fopen(filename, 'w');
+fwrite(fid, Norm_outpower, 'double');
+fclose(fid);
